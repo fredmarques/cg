@@ -1,21 +1,17 @@
 #include "prefix.h"
+#include "programwindow.h"
 
-#define Updates_Per_Second 24
+unsigned int Updates_Per_Second = 24;
 
 GLint WINDOW_WIDTH  = 800;
 GLint WINDOW_HEIGHT = 800;
 
-void renderScene(void) {
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glBegin(GL_TRIANGLES);
-        glVertex3f(-0.5,-0.5,0.0);
-        glVertex3f(0.5,0.0,0.0);
-        glVertex3f(0.0,0.5,0.0);
-    glEnd();
-
-    glutSwapBuffers();
+ProgramWindow *programWindow;
+void Timer(int iUnused)
+{
+    glutTimerFunc(Updates_Per_Second, Timer, 0);
+    glutPostRedisplay();
+    ProgramWindow::update();
 }
 
 int main(int argc, char **argv) {
@@ -30,11 +26,12 @@ int main(int argc, char **argv) {
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_WIDTH);
     glutCreateWindow("Aranha");
 
-    // register callbacks
-    glutDisplayFunc(renderScene);
-
-    // enter GLUT event processing cycle
+    programWindow = new ProgramWindow(true);
+    // calls render to avoid update been called before render
+    ProgramWindow::render();
+    glutDisplayFunc(ProgramWindow::render);
+    Timer(0);
     glutMainLoop();
-    
+
     return 1;
 }

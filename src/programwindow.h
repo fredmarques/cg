@@ -18,8 +18,8 @@ class ProgramWindow {
         ProgramWindow(bool running);
         void setRunning(bool newRunning);
         bool getRunning();
-        void render();
-        void update();
+        static void render();
+        static void update();
 };
 
 #endif
