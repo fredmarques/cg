@@ -30,6 +30,12 @@ bool ProgramWindow::getRunning() {
     return _running;
 }
 
+void ProgramWindow::mouseButtonPressed(int button, int state, int x, int y) {
+    cout << "clique do mouse:" << endl;
+    cout << "button: " << button << "\nstate: " << state << "\nx:" << x << "\ny:" << y << endl;
+    cout << "------------" << endl;
+}
+
 void ProgramWindow::render() {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f);

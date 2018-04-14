@@ -7,6 +7,12 @@ GLint WINDOW_WIDTH  = 800;
 GLint WINDOW_HEIGHT = 800;
 
 ProgramWindow *programWindow;
+
+void mouseButtonPressed(int button, int state, int x, int y) 
+{
+    ProgramWindow::mouseButtonPressed(button, state, x, y);
+}
+
 void Timer(int iUnused)
 {
     glutTimerFunc(Updates_Per_Second, Timer, 0);
@@ -27,6 +33,7 @@ int main(int argc, char **argv) {
     glutCreateWindow("Aranha");
 
     programWindow = new ProgramWindow(true);
+    glutMouseFunc(mouseButtonPressed);
     // calls render to avoid update been called before render
     ProgramWindow::render();
     glutDisplayFunc(ProgramWindow::render);

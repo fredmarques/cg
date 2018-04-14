@@ -20,6 +20,7 @@ class ProgramWindow {
         bool getRunning();
         static void render();
         static void update();
+        static void mouseButtonPressed(int button, int state, int x, int y);
 };
 
 #endif
