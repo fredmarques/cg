@@ -10,8 +10,6 @@ class ProgramWindow {
         bool _running;
         GLfloat _height;
         GLfloat _width;
-        GLuint _vertexBufferID;
-        GLuint _textureBufferID;
         void setupGL();
 
     public:
