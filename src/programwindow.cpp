@@ -19,7 +19,8 @@ struct Transform {
     } rot;
 };
 
-Transform circleTransform, quadTransform, quadTransform2, quadTransform3, quadTransform4;
+Transform circleTransform, quadTransform, quadTransform2, quadTransform3, quadTransform4, 
+          quadTransform5, quadTransform6, quadTransform7, quadTransform8;
 
 void drawCircle(float3 center, float3 radius, int segments = 64) {
     glBegin(GL_TRIANGLES);
@@ -108,25 +109,35 @@ void ProgramWindow::render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glLoadIdentity();
-
     glColor3f(0,0,0);
 
     transform(circleTransform);
     drawCircle(float3(0), float3(100, 200, 1));
 
     glPushMatrix();
-    transform(quadTransform);
-    drawQuad(float3(100, 0, 0), float3(100, 40, 0));
+        transform(quadTransform);
+        drawQuad(float3(100, 0, 0), float3(100, 40, 0));
 
-    transform(quadTransform2);
-    drawQuad(float3(0, 0, 0), float3(100, 40, 0));
+        transform(quadTransform2);
+        drawQuad(float3(0, 0, 0), float3(100, 40, 0));
     glPopMatrix();
 
-    transform(quadTransform3);
-    drawQuad(float3(0, 0, 0), float3(100, 40, 0));
+    glPushMatrix();
+        transform(quadTransform3);
+        drawQuad(float3(-100, 0, 0), float3(-100, -40, 0));
 
-    transform(quadTransform4);
-    drawQuad(float3(0, 0, 0), float3(100, 40, 0));
+        transform(quadTransform4);
+        drawQuad(float3(0, 0, 0), float3(-100, -40, 0));
+    glPopMatrix();
+
+    glPushMatrix();
+        transform(quadTransform);
+        drawQuad(float3(100, 50, 0), float3(100, 40, 0));
+
+        transform(quadTransform2);
+        drawQuad(float3(-20, 45, 0), float3(100, 40, 0));
+    glPopMatrix();
+
     glutSwapBuffers();
 }
 
@@ -136,16 +147,27 @@ void ProgramWindow::update() {
     float time = 1e-3f * msecs;
     circleTransform.pos = float3(400, 400, 0);
     
-    // quadTransform.pos = float3(400, 400, 0);
+    quadTransform.pos = float3(0, 0, 0);
     quadTransform.rot.angleRad = PI / 6 * sin01(time * 3);
 
     quadTransform2.pos = float3(180, 0, 0);
     quadTransform2.rot.angleRad = - PI / 8;
     
-    quadTransform3.pos = float3(-100, 0, 0);
-    quadTransform3.rot.angleRad = PI + (PI / 6 * sin01(time * 3));
+    quadTransform3.pos = float3(0, 0, 0);
+    quadTransform3.rot.angleRad = PI / 6 * (-1*sin01(time * 3));
 
     quadTransform4.pos = float3(-180, 0, 0);
-    quadTransform4.rot.angleRad =  - PI / 8;
+    quadTransform4.rot.angleRad =  PI / 8;
 
+    quadTransform5.pos = float3(0, 0, 0);
+    quadTransform5.rot.angleRad = PI / 6 * sin01(time * 3);
+
+    quadTransform6.pos = float3(180, 0, 0);
+    quadTransform6.rot.angleRad = - PI / 8;
+    
+    quadTransform7.pos = float3(0, 0, 0);
+    quadTransform7.rot.angleRad = PI / 6 * (-1*sin01(time * 3));
+
+    quadTransform8.pos = float3(-180, 0, 0);
+    quadTransform8.rot.angleRad =  PI / 8;
 }

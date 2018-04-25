@@ -10,6 +10,7 @@ class ProgramWindow {
         bool _running;
         GLfloat _height;
         GLfloat _width;
+
         void setupGL();
 
     public:
