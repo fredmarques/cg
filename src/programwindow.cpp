@@ -5,12 +5,24 @@
 
 using namespace std;
 
-struct VertexData {
-    float3 pos;
-// 	float2 uv;
+struct Spider {
+    struct {
+        float3 curr = {400, 400, 0};
+        float3 target = {400, 400, 0};
+    }pos;
+    float3 scale = {1, 1, 1};
+    struct {
+        float curr = 0;
+        float target = 0;
+        float dist = 0;
+        bool dir = true; // true -> C.C.W | false -> C.W (Clock.Wise)
+        bool roting = false;
+        float offset = 0;
+    } rot;
 };
 
-struct Transform {
+struct Transform
+{
     float3 pos = {0, 0, 0};
     float3 scale = {1, 1, 1};
     struct {
@@ -18,6 +30,8 @@ struct Transform {
         const float3 vec = {0, 0, 1};
     } rot;
 };
+
+Spider spider;
 
 Transform circleTransform, quadTransform, quadTransform2, quadTransform3, quadTransform4, 
           quadTransform5, quadTransform6, quadTransform7, quadTransform8;
@@ -59,24 +73,6 @@ ProgramWindow::ProgramWindow(bool running) : _running(running), _height(800), _w
 }
 
 void ProgramWindow::setupGL() {
-    //////////////////////////////////////////////////////////////////////////
-    // Create things to look at
-
-    // OH LOOK A CIRCLE
-    
-
-    // OH LOOK A QUAD :D
-    // VertexData quadVerts[6] = {
-    //     {{-.5f, +.5f, 0.f}},
-    //     {{-.5f, -.5f, 0.f}},
-    //     {{+.5f, -.5f, 0.f}},
-
-    //     {{-.5f, +.5f, 0.f}},
-    //     {{+.5f, -.5f, 0.f}},
-    //     {{+.5f, +.5f, 0.f}},
-    // };
-
-    // ajusting view
     glMatrixMode(GL_PROJECTION);
     gluOrtho2D(0, _width, 0, _height);
 
@@ -95,6 +91,7 @@ void ProgramWindow::mouseButtonPressed(int button, int state, int x, int y) {
     cout << "clique do mouse:" << endl;
     cout << "button: " << button << "\nstate: " << state << "\nx:" << x << "\ny:" << y << endl;
     cout << "------------" << endl;
+    spider.pos.target = {x, y, 0};
 }
 
 void transform(const Transform& transform) {
@@ -145,7 +142,63 @@ void ProgramWindow::render() {
 void ProgramWindow::update() {
     int msecs = glutGet(GLUT_ELAPSED_TIME);
     float time = 1e-3f * msecs;
-    circleTransform.pos = float3(400, 400, 0);
+
+    // find angle to move to click
+    float3 delta = spider.pos.curr - spider.pos.target;
+    float angle = atan2f(delta.x, delta.y);
+    // printf(">> angle: %f\n", angle);
+    spider.rot.target = angle;
+
+    float deltaAngle = spider.rot.curr - spider.rot.target;
+    spider.rot.dir = deltaAngle < 0;
+    // spider.rot.dir = spider.rot.target < 0 && spider.rot.curr < 0 ? !spider.rot.dir : spider.rot.dir;
+
+    if (abs(deltaAngle) > 3.2) {
+        spider.rot.dist = abs(deltaAngle) - 3.2;
+        spider.rot.dir = !spider.rot.dir;
+    } else {
+        spider.rot.dist = abs(deltaAngle);
+    }
+
+    printf("------------------\n");
+    printf("target: %f\n", spider.rot.target);
+    printf("curr: %f\n", spider.rot.curr);
+    printf("dist: %f\n", spider.rot.dist);
+    printf("direction: %f\n", spider.rot.dir);
+    printf("------------------\n");
+
+    if(spider.rot.dist > 0.1) {
+        float da = abs(spider.rot.target) / time * 0.05;
+        // if angle goes beyond limits, change singal and take the complementar angle
+        if(abs(spider.rot.curr) > 3.2) {
+            spider.rot.curr = 3.2 - (spider.rot.curr - 3.2);
+            spider.rot.dir = !spider.rot.dir;
+        }
+    
+        if (spider.rot.dir) {
+            spider.rot.curr += da;
+        }else {
+            spider.rot.curr -= da;
+        }
+    }
+
+
+    // angle = angle + (10 * delta * time);
+
+    // float t = 0;
+
+    // interpolate angle
+    // t += time;
+    // Lerp(0, angle, 1);
+
+
+    // move spider
+    // float speed = 10;
+    // float3 dir = /* */;
+    // spiderPosition += speed * dir * time;
+
+    circleTransform.pos = spider.pos.curr;
+    circleTransform.rot.angleRad = spider.rot.curr;
     
     quadTransform.pos = float3(0, 0, 0);
     quadTransform.rot.angleRad = PI / 6 * sin01(time * 3);
@@ -165,9 +218,9 @@ void ProgramWindow::update() {
     quadTransform6.pos = float3(180, 0, 0);
     quadTransform6.rot.angleRad = - PI / 8;
     
-    quadTransform7.pos = float3(0, 0, 0);
-    quadTransform7.rot.angleRad = PI / 6 * (-1*sin01(time * 3));
+    // quadTransform7.pos = float3(0, 0, 0);
+    // quadTransform7.rot.angleRad = PI / 6 * (-1*sin01(time * 3));
 
-    quadTransform8.pos = float3(-180, 0, 0);
-    quadTransform8.rot.angleRad =  PI / 8;
+    // quadTransform8.pos = float3(-180, 0, 0);
+    // quadTransform8.rot.angleRad =  PI / 8;
 }
