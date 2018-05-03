@@ -210,6 +210,7 @@ void ProgramWindow::update() {
 
     circleTransform.pos = spider.pos.curr;
     circleTransform.rot.angleRad = spider.rot.curr;
+    circleTransform.scale = float3(1 + sin01(time * 3) * 0.3,1+ sin01(time * 3) * 0.3,1);
     
     quadTransform.pos = float3(0, 0, 0);
     quadTransform.rot.angleRad = PI / 6 * sin01(time * 3);
