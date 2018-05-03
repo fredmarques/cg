@@ -14,10 +14,11 @@ struct Spider {
     struct {
         float curr = 0;
         float target = 0;
+        float prev = 0;
         float dist = 0;
+        float angle = 0;
         bool dir = true; // true -> C.C.W | false -> C.W (Clock.Wise)
-        bool roting = false;
-        float offset = 0;
+        bool rotating = false;
     } rot;
 };
 
@@ -88,10 +89,18 @@ bool ProgramWindow::getRunning() {
 }
 
 void ProgramWindow::mouseButtonPressed(int button, int state, int x, int y) {
-    cout << "clique do mouse:" << endl;
-    cout << "button: " << button << "\nstate: " << state << "\nx:" << x << "\ny:" << y << endl;
-    cout << "------------" << endl;
     spider.pos.target = {x, y, 0};
+    float3 delta = spider.pos.curr - spider.pos.target;
+    float angle = atan2f(delta.x, delta.y);
+    spider.rot.target = angle;
+
+    // if angle goes beyond limits, change singal and take the complementar angle
+    float d = (abs(spider.rot.curr) - 3.2);
+    if(spider.rot.curr > 3.2) {
+        spider.rot.curr = -(3.2 - d);
+    } else if (spider.rot.curr < - 3.2) {
+        spider.rot.curr = (3.2 - d);
+    }
 }
 
 void transform(const Transform& transform) {
@@ -143,47 +152,49 @@ void ProgramWindow::update() {
     int msecs = glutGet(GLUT_ELAPSED_TIME);
     float time = 1e-3f * msecs;
 
-    // find angle to move to click
-    float3 delta = spider.pos.curr - spider.pos.target;
-    float angle = atan2f(delta.x, delta.y);
-    // printf(">> angle: %f\n", angle);
-    spider.rot.target = angle;
+    if(spider.rot.prev != spider.rot.target) {
+        spider.rot.prev = spider.rot.target;
+    
+        float deltaAngle = spider.rot.curr - spider.rot.target;
 
-    float deltaAngle = spider.rot.curr - spider.rot.target;
-    spider.rot.dir = deltaAngle < 0;
-    // spider.rot.dir = spider.rot.target < 0 && spider.rot.curr < 0 ? !spider.rot.dir : spider.rot.dir;
-
-    if (abs(deltaAngle) > 3.2) {
-        spider.rot.dist = abs(deltaAngle) - 3.2;
-        spider.rot.dir = !spider.rot.dir;
-    } else {
-        spider.rot.dist = abs(deltaAngle);
+        // spider.rot.dist = abs(deltaAngle);
+        spider.rot.dir = deltaAngle < 0;
+        // if complementar angle, use the small one
+        if (abs(deltaAngle) > 3.2) {
+            // taking smallest angular space
+            spider.rot.dist = abs(6.4 - abs(deltaAngle) - 0.11);
+            // change direction to move through smallest angle
+            spider.rot.dir = !spider.rot.dir;
+        } else {
+            // taking regular angular space
+            spider.rot.dist = abs(deltaAngle);
+        }
+        spider.rot.rotating = true;
     }
 
-    printf("------------------\n");
-    printf("target: %f\n", spider.rot.target);
-    printf("curr: %f\n", spider.rot.curr);
-    printf("dist: %f\n", spider.rot.dist);
-    printf("direction: %f\n", spider.rot.dir);
-    printf("------------------\n");
+    float da = 3.2 / PI / 130;
+    if(spider.rot.dist > da && spider.rot.rotating) {
 
-    if(spider.rot.dist > 0.1) {
-        float da = abs(spider.rot.target) / time * 0.05;
-        // if angle goes beyond limits, change singal and take the complementar angle
-        if(abs(spider.rot.curr) > 3.2) {
-            spider.rot.curr = 3.2 - (spider.rot.curr - 3.2);
-            spider.rot.dir = !spider.rot.dir;
-        }
-    
         if (spider.rot.dir) {
             spider.rot.curr += da;
-        }else {
+        } else {
             spider.rot.curr -= da;
         }
+        spider.rot.dist -= da;
+    } else if(spider.rot.rotating){
+        spider.rot.dist = 0;
+        spider.rot.rotating = false;
+        spider.rot.curr = spider.rot.target;
+
+        // printf("------------------\n");
+        // printf("target: %f\n", spider.rot.target);
+        // printf("curr: %f\n", spider.rot.curr);
+        // printf("prev: %f\n", spider.rot.prev);
+        // printf("dist: %f\n", spider.rot.dist);
+        // printf("direction: %d\n", spider.rot.dir);
+        // printf("------------------\n");
     }
 
-
-    // angle = angle + (10 * delta * time);
 
     // float t = 0;
 
