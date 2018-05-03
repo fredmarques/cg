@@ -9,6 +9,8 @@ struct Spider {
     struct {
         float3 curr = {400, 400, 0};
         float3 target = {400, 400, 0};
+        float3 dir = {0,0,0};
+        bool moving = false;
     }pos;
     float3 scale = {1, 1, 1};
     struct {
@@ -35,7 +37,7 @@ struct Transform
 Spider spider;
 
 Transform circleTransform, quadTransform, quadTransform2, quadTransform3, quadTransform4, 
-          quadTransform5, quadTransform6, quadTransform7, quadTransform8;
+          quadTransform5, quadTransform6, quadTransform7, quadTransform8, boxTransform;
 
 void drawCircle(float3 center, float3 radius, int segments = 64) {
     glBegin(GL_TRIANGLES);
@@ -90,6 +92,15 @@ bool ProgramWindow::getRunning() {
 
 void ProgramWindow::mouseButtonPressed(int button, int state, int x, int y) {
     spider.pos.target = {x, y, 0};
+    // printf(">>target: %d, %d\n", x, y);
+    cout <<"target " << x << ", " << y << ", " << state << endl;
+    printf("curr: %f, %f\n", spider.pos.curr.x, spider.pos.curr.y);
+    spider.pos.dir = spider.pos.target - spider.pos.curr ;
+    printf("dir: %f, %f\n", spider.pos.dir.x, spider.pos.dir.y);
+
+    spider.pos.dir /= sqrtf32(powf32(spider.pos.dir.x, 2) + powf32(spider.pos.dir.y, 2));
+    spider.pos.moving = false;
+
     float3 delta = spider.pos.curr - spider.pos.target;
     float angle = atan2f(delta.x, delta.y);
     spider.rot.target = angle;
@@ -172,7 +183,8 @@ void ProgramWindow::update() {
         spider.rot.rotating = true;
     }
 
-    float da = 3.2 / PI / 130;
+    // float da = 3.2 / PI / 130;
+    float da = 3.2 / PI / 80;
     if(spider.rot.dist > da && spider.rot.rotating) {
 
         if (spider.rot.dir) {
@@ -185,6 +197,7 @@ void ProgramWindow::update() {
         spider.rot.dist = 0;
         spider.rot.rotating = false;
         spider.rot.curr = spider.rot.target;
+        spider.pos.moving = true;
 
         // printf("------------------\n");
         // printf("target: %f\n", spider.rot.target);
@@ -195,22 +208,23 @@ void ProgramWindow::update() {
         // printf("------------------\n");
     }
 
-
-    // float t = 0;
-
-    // interpolate angle
-    // t += time;
-    // Lerp(0, angle, 1);
-
-
-    // move spider
-    // float speed = 10;
-    // float3 dir = /* */;
-    // spiderPosition += speed * dir * time;
-
     circleTransform.pos = spider.pos.curr;
+    float3 delta = spider.pos.target - spider.pos.curr;
+    // printf("delta: %f, %f\n", delta.x, delta.y);
+
+    if (spider.pos.moving && abs(delta.x) > 0.01 && abs(delta.y) > 0.01) {
+        // printf("dir: %f, %f\n", spider.pos.dir.x, spider.pos.dir.y);
+        spider.pos.curr += spider.pos.dir;
+        // printf("curr: %f, %f\n", spider.pos.curr.x, spider.pos.curr.y);
+        // printf("target: %f, %f\n", spider.pos.target.x, spider.pos.target.y);
+    } else if(spider.pos.moving) {
+        printf("stop!\n");
+        spider.pos.curr = spider.pos.target;
+        spider.pos.moving = false;
+    }
+
     circleTransform.rot.angleRad = spider.rot.curr;
-    circleTransform.scale = float3(1 + sin01(time * 3) * 0.3,1+ sin01(time * 3) * 0.3,1);
+    // circleTransform.scale = float3(1 + sin01(time * 3) * 0.1,1+ sin01(time * 3) * 0.1,1);
     
     quadTransform.pos = float3(0, 0, 0);
     quadTransform.rot.angleRad = PI / 6 * sin01(time * 3);
@@ -229,7 +243,7 @@ void ProgramWindow::update() {
 
     quadTransform6.pos = float3(180, 0, 0);
     quadTransform6.rot.angleRad = - PI / 8;
-    
+
     // quadTransform7.pos = float3(0, 0, 0);
     // quadTransform7.rot.angleRad = PI / 6 * (-1*sin01(time * 3));
 
