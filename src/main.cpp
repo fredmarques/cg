@@ -9,8 +9,12 @@ GLint WINDOW_HEIGHT = 800;
 
 ProgramWindow *programWindow;
 
-void mouseButtonPressed(int button, int state, int x, int y) {
-    ProgramWindow::mouseButtonPressed(button, state, x, y);
+// void mouseButtonPressed(int button, int state, int x, int y) {
+//     ProgramWindow::mouseButtonPressed(button, state, x, y);
+// }
+
+void keyboardButtonPressed(unsigned char key, int x, int y) {
+    ProgramWindow::keyboardButtonPressed(key, x, y);
 }
 
 void loop() {
@@ -52,7 +56,8 @@ int main(int argc, char **argv) {
     }
 
     programWindow = new ProgramWindow(true);
-    glutMouseFunc(mouseButtonPressed);
+    // glutMouseFunc(mouseButtonPressed);
+    glutKeyboardFunc(keyboardButtonPressed);
     glutDisplayFunc(ProgramWindow::render);
     glutIdleFunc(loop);
     glutMainLoop();
