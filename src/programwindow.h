@@ -21,6 +21,7 @@ class ProgramWindow {
         static void update();
         static void mouseButtonPressed(int button, int state, int x, int y);
         static void keyboardButtonPressed(unsigned char key, int x, int y);
+        static void reshapeCallback(int w, int h);
 };
 
 #endif

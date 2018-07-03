@@ -5,11 +5,13 @@
 
 
 using namespace std;
+GLint width = 800;
+GLint height = 800;
 
 struct Spider {
     struct {
-        float3 curr = {400.0f, 400.0f, 0.0f};
-        float3 target = {400.0f, 400.0f, 0.0f};
+        float3 curr = {1.0f, 1.0f, 1.0f};
+        float3 target = {1.0f, 1.0f, 1.0f};
         int flag = 0;
     }pos;
     float3 scale = {1, 1, 1};
@@ -26,10 +28,10 @@ struct Spider {
 struct Transform
 {
     float3 pos = {0, 0, 0};
-    float3 scale = {1, 1, 1};
+    float3 scale = {0.01, 0.01, 0.01};
     struct {
-        float angleRad = 0;
-        const float3 vec = {0, 0, 1};
+        float angleRad = PI/3;
+        const float3 vec = {1, 1, 1};
     } rot;
 };
 
@@ -45,7 +47,7 @@ void drawCircle(float3 center, float3 radius, int segments = 64) {
     for (int i = 0; i < segments; i++) {
         GLfloat angle1 = i * step;
         GLfloat angle2 = (i + 1) * step;
-        
+
         float3 v2 = center + radius * float3(cosf(angle2), sinf(angle2), 0);
         float3 v3 = center + radius * float3(cosf(angle1), sinf(angle1), 0);
 
@@ -77,8 +79,9 @@ ProgramWindow::ProgramWindow(bool running) : _running(running), _height(800), _w
 
 void ProgramWindow::setupGL() {
     glMatrixMode(GL_PROJECTION);
-    gluOrtho2D(0, _width, 0, _height);
-
+    // gluOrtho2D(0, _width, 0, _height);
+	glLoadIdentity();
+	gluPerspective(65.0, (GLfloat) width/(GLfloat) height, 1.0, 20.0);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -321,87 +324,153 @@ void ProgramWindow::update() {
     circle2Transform.pos = float3(0, -220, 0);
 }
 
-void ProgramWindow::render() {
-    glClearColor(1, 1, 1, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glLoadIdentity();
+void draw() {
     glColor3f(0,0,0);
 
     transform(circleTransform);
-    drawCircle(float3(0), float3(100, 100, 0));
-    
+    drawCircle(float3(0), float3(100, 100, 100));
+
     glPushMatrix();
         transform(leg1Part1);
-        drawQuad(float3(0, 0, 0), float3(200, 15, 0));
+        drawQuad(float3(0), float3(200, 15, 150));
 
         transform(leg1Part2);
-        drawQuad(float3(0, 0, 0), float3(100, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(100, 15, 15));
     glPopMatrix();
 
     glPushMatrix();
         transform(leg2Part1);
-        drawQuad(float3(0, 0, 0), float3(160, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(160, 15, 15));
 
         transform(leg2Part2);
-        drawQuad(float3(0, 0, 0), float3(80, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(80, 15, 15));
     glPopMatrix();
 
     glPushMatrix();
         transform(leg3Part1);
-        drawQuad(float3(0, 0, 0), float3(120, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(120, 15, 15));
 
         transform(leg3Part2);
-        drawQuad(float3(0, 0, 0), float3(60, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(60, 15, 15));
     glPopMatrix();
 
     glPushMatrix();
         transform(leg4Part1);
-        drawQuad(float3(0, 0, 0), float3(100, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(100, 15, 15));
 
         transform(leg4Part2);
-        drawQuad(float3(0, 0, 0), float3(140, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(140, 15, 15));
     glPopMatrix();
 
     glPushMatrix();
         transform(leg5Part1);
-        drawQuad(float3(0, 0, 0), float3(-200, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(-200, 15, 15));
 
         transform(leg5Part2);
-        drawQuad(float3(0, 0, 0), float3(-100, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(-100, 15, 15));
     glPopMatrix();
 
 
     glPushMatrix();
         transform(leg6Part1);
-        drawQuad(float3(0, 0, 0), float3(-160, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(-160, 15, 15));
 
         transform(leg6Part2);
-        drawQuad(float3(0, 0, 0), float3(-80, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(-80, 15, 15));
     glPopMatrix();
 
 
     glPushMatrix();
         transform(leg7Part1);
-        drawQuad(float3(0, 0, 0), float3(-120, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(-120, 15, 15));
 
         transform(leg7Part2);
-        drawQuad(float3(0, 0, 0), float3(-60, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(-60, 15, 15));
     glPopMatrix();
 
     glPushMatrix();
         transform(leg8Part1);
-        drawQuad(float3(0, 0, 0), float3(-100, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(-100, 15, 15));
 
         transform(leg8Part2);
-        drawQuad(float3(0, 0, 0), float3(-140, 15, 0));
+        drawQuad(float3(0, 0, 0), float3(-140, 15, 15));
     glPopMatrix();
 
     glPushMatrix();
         transform(circle2Transform);
-        drawCircle(float3(0), float3(120, 160, 0));
+        drawCircle(float3(0), float3(120, 160, 160));
     glPopMatrix();
+}
 
+void ProgramWindow::render() {
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(1, 1, 1, 1);
+
+    glLoadIdentity();
+	gluLookAt(6.0, 2.0, 10.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    glColor3f(0,0,0);
+
+	glViewport(0, 0, width, height);
+    draw();
+
+	glViewport(0, 0, width/2, height/2);
+     glBegin(GL_QUADS);                // Begin drawing the color cube with 6 quads
+      // Top face (y = 1.0f)
+      // Define vertices in counter-clockwise (CCW) order with normal pointing out
+      glColor3f(0.0f, 1.0f, 0.0f);     // Green
+      glVertex3f( 100.0f, 100.0f, -100.0f);
+      glVertex3f(-100.0f, 100.0f, -100.0f);
+      glVertex3f(-100.0f, 100.0f,  100.0f);
+      glVertex3f( 100.0f, 100.0f,  100.0f);
+ 
+      // Bottom face (y = -100.0f)
+      glColor3f(1.0f, 0.5f, 0.0f);     // Orange
+      glVertex3f( 100.0f, -100.0f,  100.0f);
+      glVertex3f(-100.0f, -100.0f,  100.0f);
+      glVertex3f(-100.0f, -100.0f, -100.0f);
+      glVertex3f( 100.0f, -100.0f, -100.0f);
+ 
+      // Front face  (z = 100.0f)
+      glColor3f(1.0f, 0.0f, 0.0f);     // Red
+      glVertex3f( 100.0f,  100.0f, 100.0f);
+      glVertex3f(-100.0f,  100.0f, 100.0f);
+      glVertex3f(-100.0f, -100.0f, 100.0f);
+      glVertex3f( 100.0f, -100.0f, 100.0f);
+ 
+      // Back face (z = -100.0f)
+      glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
+      glVertex3f( 100.0f, -100.0f, -100.0f);
+      glVertex3f(-100.0f, -100.0f, -100.0f);
+      glVertex3f(-100.0f,  100.0f, -100.0f);
+      glVertex3f( 100.0f,  100.0f, -100.0f);
+ 
+      // Left face (x = -100.0f)
+      glColor3f(0.0f, 0.0f, 100.0f);     // Blue
+      glVertex3f(-100.0f,  100.0f,  100.0f);
+      glVertex3f(-100.0f,  100.0f, -100.0f);
+      glVertex3f(-100.0f, -100.0f, -100.0f);
+      glVertex3f(-100.0f, -100.0f,  100.0f);
+ 
+      // Right face (x = 100.0f)
+      glColor3f(1.0f, 0.0f, 1.0f);     // Magenta
+      glVertex3f(100.0f,  100.0f, -100.0f);
+      glVertex3f(100.0f,  100.0f,  100.0f);
+      glVertex3f(100.0f, -100.0f,  100.0f);
+      glVertex3f(100.0f, -100.0f, -100.0f);
+    glEnd();  // End of drawing color-cube
 
     glutSwapBuffers();
+}
+
+void ProgramWindow::reshapeCallback(int w, int h)
+{
+	/** Atualiza os valores da janela */
+	width = w;
+	height = h;
+	/** Define o volume de vista */
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(65.0, (GLfloat) width/(GLfloat) height, 1.0, 20.0);
+	glMatrixMode(GL_MODELVIEW);
 }
