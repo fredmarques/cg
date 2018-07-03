@@ -1,26 +1,25 @@
 #include "prefix.h"
 #include "programwindow.h"
 #include "float3.h"
+#include "math.h"
 
 
 using namespace std;
 
 struct Spider {
     struct {
-        float3 curr = {400, 400, 0};
-        float3 target = {400, 400, 0};
-        float3 dir = {0,0,0};
-        bool moving = false;
+        float3 curr = {400.0f, 400.0f, 0.0f};
+        float3 target = {400.0f, 400.0f, 0.0f};
+        int flag = 0;
     }pos;
     float3 scale = {1, 1, 1};
     struct {
-        float curr = 0.0;
-        float target = 0.0;
-        float prev = 0.0;
-        float dist = 0.0;
-        float angle = 0.0;
+        float curr = 0;
+        float target = 0;
+        float dist = 0;
         bool dir = true; // true -> C.C.W | false -> C.W (Clock.Wise)
-        bool rotating = false;
+        bool roting = false;
+        float offset = 0;
     } rot;
 };
 
@@ -36,8 +35,9 @@ struct Transform
 
 Spider spider;
 
-Transform circleTransform, quadTransform, quadTransform2, quadTransform3, quadTransform4, 
-          quadTransform5, quadTransform6, quadTransform7, quadTransform8, boxTransform;
+Transform circleTransform, circle2Transform, leg1Part1, leg1Part2, leg2Part1, leg2Part2, 
+          leg3Part1, leg3Part2, leg4Part1, leg4Part2, leg5Part1, leg5Part2, leg6Part1, leg6Part2, 
+          leg7Part1, leg7Part2, leg8Part1, leg8Part2;
 
 void drawCircle(float3 center, float3 radius, int segments = 64) {
     glBegin(GL_TRIANGLES);
@@ -82,6 +82,13 @@ void ProgramWindow::setupGL() {
     glMatrixMode(GL_MODELVIEW);
 }
 
+/*void moveTo(){
+     while(spider.pos.curr.x != spider.pos.target.x or spider.pos.curr.y != 400.0f spider.pos.target.y){
+           spider.pos.curr += float3(0.0f,0.01f,0.0f);
+           spider.pos.curr += float3(0.01f,0.0f,0.0f);
+     }
+}*/
+
 void ProgramWindow::setRunning(bool newRunning) {
     _running = newRunning;
 }
@@ -90,44 +97,32 @@ bool ProgramWindow::getRunning() {
     return _running;
 }
 
-// void ProgramWindow::mouseButtonPressed(int button, int state, int x, int y) {
-//     spider.pos.target = {x, y, 0};
-//     // printf(">>target: %d, %d\n", x, y);
-//     cout <<"target " << x << ", " << y << ", " << state << endl;
-//     printf("curr: %f, %f\n", spider.pos.curr.x, spider.pos.curr.y);
-//     spider.pos.dir = spider.pos.target - spider.pos.curr ;
-//     printf("dir: %f, %f\n", spider.pos.dir.x, spider.pos.dir.y);
+void ProgramWindow::mouseButtonPressed(int button, int state, int x, int y) {
+    cout << "clique do mouse:" << endl;
+    cout << "button: " << button << "\nstate: " << state << "\nx:" << x << "\ny:" << y << endl;
+    cout << "angle: " << circleTransform.rot.angleRad;
+    cout << "------------" << endl;
+    spider.pos.target = {x, y, 0};
+    spider.pos.flag = state;
+}
 
-//     spider.pos.dir /= sqrtf32(powf32(spider.pos.dir.x, 2) + powf32(spider.pos.dir.y, 2));
-//     spider.pos.moving = false;
-
-//     float3 delta = spider.pos.curr - spider.pos.target;
-//     float angle = atan2f(delta.x, delta.y);
-//     spider.rot.target = angle;
-
-//     // if angle goes beyond limits, change singal and take the complementar angle
-//     float d = (abs(spider.rot.curr) - 3.2);
-//     if(spider.rot.curr > 3.2) {
-//         spider.rot.curr = -(3.2 - d);
-//     } else if (spider.rot.curr < - 3.2) {
-//         spider.rot.curr = (3.2 - d);
-//     }
-// }
-void ProgramWindow::keyboardButtonPressed(unsigned char key, int x, int y) {
+void ProgramWindow::keyboardButtonPressed(unsigned char key, int x, int y)
+{
     printf("[keyboard]\n");
     // post = angulo * cosf
     float3 step = {10.0, 10.0, 0};
     float3 angle = {0.0, 0.0, 0.0};
 
-    switch (key) {
+    switch (key)
+    {
     case 'w':
-        angle = float3(-sinf(spider.rot.curr), cosf(spider.rot.curr) , 1);
+        angle = float3(-sinf(spider.rot.curr), cosf(spider.rot.curr), 1);
         printf("[keyboard] %c %f %f\n", key, angle.x, angle.y);
         spider.pos.curr = spider.pos.curr + (step * angle);
         printf("rot: %f ", cosf(spider.rot.curr));
         break;
     case 's':
-        angle = float3(-sinf(spider.rot.curr), cosf(spider.rot.curr) , 1);
+        angle = float3(-sinf(spider.rot.curr), cosf(spider.rot.curr), 1);
         printf("[keyboard] %c %f %f\n", key, angle.x, angle.y);
         spider.pos.curr = spider.pos.curr - (step * angle);
         printf("rot: %f ", cosf(spider.rot.curr));
@@ -144,27 +139,6 @@ void ProgramWindow::keyboardButtonPressed(unsigned char key, int x, int y) {
         printf("rot: %f ", cosf(spider.rot.curr));
         break;
     }
-    // spider.pos.target = {x, y, 0};
-    // // printf(">>target: %d, %d\n", x, y);
-    // cout <<"target " << x << ", " << y << ", " << state << endl;
-    // printf("curr: %f, %f\n", spider.pos.curr.x, spider.pos.curr.y);
-    // spider.pos.dir = spider.pos.target - spider.pos.curr ;
-    // printf("dir: %f, %f\n", spider.pos.dir.x, spider.pos.dir.y);
-
-    // spider.pos.dir /= sqrtf32(powf32(spider.pos.dir.x, 2) + powf32(spider.pos.dir.y, 2));
-    // spider.pos.moving = false;
-
-    // float3 delta = spider.pos.curr - spider.pos.target;
-    // float angle = atan2f(delta.x, delta.y);
-    // spider.rot.target = angle;
-
-    // // if angle goes beyond limits, change singal and take the complementar angle
-    // float d = (abs(spider.rot.curr) - 3.2);
-    // if(spider.rot.curr > 3.2) {
-    //     spider.rot.curr = -(3.2 - d);
-    // } else if (spider.rot.curr < - 3.2) {
-    //     spider.rot.curr = (3.2 - d);
-    // }
 }
 
 void transform(const Transform& transform) {
@@ -174,132 +148,260 @@ void transform(const Transform& transform) {
     glScalef(transform.scale.x, transform.scale.y, transform.scale.z);
 }
 
+void ProgramWindow::update() {
+    int msecs = glutGet(GLUT_ELAPSED_TIME);
+    float time = 1e-3f * msecs;
+
+    //movimenta a aranha
+    
+    if (spider.pos.flag == 1 and spider.pos.curr.x != spider.pos.target.x and circleTransform.rot.angleRad >= 0 and circleTransform.rot.angleRad <=PI/2.0f){
+         spider.pos.curr -= float3(0.01f,0.0f,0.0f);
+    }
+
+    if( spider.pos.flag == 1 and spider.pos.curr.y != spider.pos.target.y and circleTransform.rot.angleRad >= 0 and circleTransform.rot.angleRad <=PI/2.0f){
+         spider.pos.curr += float3(0.0f,0.01f,0.0f);
+    }
+    if (spider.pos.flag == 1 and spider.pos.curr.x != spider.pos.target.x and circleTransform.rot.angleRad > PI/2.0f and circleTransform.rot.angleRad <=PI){
+         spider.pos.curr -= float3(0.01f,0.0f,0.0f);
+    }
+
+    if( spider.pos.flag == 1 and spider.pos.curr.y != spider.pos.target.y and circleTransform.rot.angleRad > PI/2.0f and circleTransform.rot.angleRad <=PI){
+         spider.pos.curr -= float3(0.0f,0.01f,0.0f);
+    }
+
+//works until here
+
+    if (spider.pos.flag == 1 and spider.pos.curr.x != spider.pos.target.x and circleTransform.rot.angleRad > -PI and circleTransform.rot.angleRad < -PI/2.0f){
+         spider.pos.curr += float3(0.01f,0.0f,0.0f);
+    }
+
+    if( spider.pos.flag == 1 and spider.pos.curr.y != spider.pos.target.y and circleTransform.rot.angleRad >= -PI and circleTransform.rot.angleRad < -PI/2.0f){
+         spider.pos.curr -= float3(0.0f,0.01f,0.0f);
+    }
+
+//works
+
+    if (spider.pos.flag == 1 and spider.pos.curr.x != spider.pos.target.x and circleTransform.rot.angleRad > -PI/2.0f and circleTransform.rot.angleRad <0){
+         spider.pos.curr += float3(0.01f,0.0f,0.0f);
+    }
+
+    if( spider.pos.flag == 1 and spider.pos.curr.y != spider.pos.target.y and circleTransform.rot.angleRad > - PI/2.0f and circleTransform.rot.angleRad < 0){
+         spider.pos.curr += float3(0.0f,0.01f,0.0f);
+    }
+
+    // find angle to move to click
+    float3 delta = spider.pos.curr - spider.pos.target;
+    float angle = atan2f(delta.x, delta.y);
+    // printf(">> angle: %f\n", angle);
+    spider.rot.target = angle;
+
+    float deltaAngle = spider.rot.curr - spider.rot.target;
+    spider.rot.dir = deltaAngle < 0;
+    // spider.rot.dir = spider.rot.target < 0 && spider.rot.curr < 0 ? !spider.rot.dir : spider.rot.dir;
+
+    if (abs(deltaAngle) > 3.2) {
+        spider.rot.dist = abs(deltaAngle) - 3.2;
+        spider.rot.dir = !spider.rot.dir;
+    } else {
+        spider.rot.dist = abs(deltaAngle);
+    }
+/*
+    printf("------------------\n");
+    printf("target: %f\n", spider.rot.target);
+    printf("curr: %f\n", spider.rot.curr);
+    printf("dist: %f\n", spider.rot.dist);
+    printf("direction: %f\n", spider.rot.dir);
+    printf("flag: %f\n", spider.pos.flag);
+    printf("flag: %f\n", spider.pos.target);
+    printf("flag: %f\n", spider.pos.curr);
+    printf("------------------\n");
+*/
+    if(spider.rot.dist > 0.1) {
+        float da = abs(spider.rot.target) / time * 0.05;
+        // if angle goes beyond limits, change singal and take the complementar angle
+        if(abs(spider.rot.curr) > 3.2) {
+            spider.rot.curr = 3.2 - (spider.rot.curr - 3.2);
+            spider.rot.dir = !spider.rot.dir;
+        }
+    
+        if (spider.rot.dir) {
+            spider.rot.curr += da;
+        }else {
+            spider.rot.curr -= da;
+        }
+    }
+
+    circleTransform.pos = spider.pos.curr;
+    circleTransform.rot.angleRad = spider.rot.curr;
+    
+
+    // Transformation
+    
+/*
+    leg3Part1.rot.angleRad = PI/8; // Same
+
+    leg3Part2.pos = float3(-195, 0, 0);
+    leg3Part2.rot.angleRad = - PI / 3; // Same
+
+    leg3Part1.rot.angleRad *= -1 * sin01(time * 2); // multiply -1
+
+
+   /* 
+    leg2Part1.pos = float3(0, 0, 0);
+    leg2Part1.rot.angleRad = PI / 6;
+
+    leg2Part2.pos = float3(-195, 0, 0);
+    leg2Part2.rot.angleRad =  PI / 6;
+
+    leg3Part1.pos = float3(0, 0, 0);
+    leg3Part1.rot.angleRad = PI / 6;
+
+    leg3Part2.pos = float3(195, 0, 0);
+    leg3Part2.rot.angleRad = - PI / 6;
+
+
+
+    leg3Part1.rot.angleRad *= sin01(time * 3);
+*/
+    // Movimentação
+    
+    //leg1Part1.rot.angleRad = PI/4 * sin01(time * 2);
+
+
+    leg1Part1.pos = float3(60, 60, 0);
+    leg1Part2.pos = float3(193, 0, 0);
+    leg1Part2.rot.angleRad = - PI / 3;
+    leg1Part1.rot.angleRad = (4*PI)/8;
+    leg1Part1.rot.angleRad = PI/8 * (sin01(time * 5) + (4*PI)/8);
+
+    leg2Part1.pos = float3(70, 20, 0);
+    leg2Part2.pos = float3(153, 0, 0);
+    leg2Part2.rot.angleRad = - PI / 3;
+    leg2Part1.rot.angleRad = (2*PI)/8;
+    leg2Part1.rot.angleRad = PI/8 * (sin01(time * 4) + (2*PI)/8);
+
+    leg3Part1.pos = float3(80, -10, 0);
+    leg3Part2.pos = float3(113, 0, 0);
+    leg3Part2.rot.angleRad = - PI / 3;
+    leg3Part1.rot.angleRad = PI/8;
+    leg3Part1.rot.angleRad = PI/8 * (sin01(time * 3) + PI/8);
+
+    leg4Part1.pos = float3(70, -40, 0);
+    leg4Part2.pos = float3(93, 0, 0);
+    leg4Part2.rot.angleRad = - PI / 4;
+    leg4Part1.rot.angleRad = -(2*PI)/8;
+    leg4Part1.rot.angleRad = PI/8 * (sin01(time * 4) - (2*PI)/8);
+
+
+    leg5Part1.pos = float3(-60, 60, 0);
+    leg5Part2.pos = float3(-193, 0, 0);
+    leg5Part2.rot.angleRad = PI / 3;
+    leg5Part1.rot.angleRad = (-4*PI)/8;
+    leg5Part1.rot.angleRad = PI/8 * (sin01(time * 5) + (-4*PI)/8);
+
+    leg6Part1.pos = float3(-70, 20, 0);
+    leg6Part2.pos = float3(-153, 0, 0);
+    leg6Part2.rot.angleRad = PI / 3;
+    leg6Part1.rot.angleRad = (-2*PI)/8;
+    leg6Part1.rot.angleRad = PI/8 * (sin01(time * 4) + (-2*PI)/8);
+
+    leg7Part1.pos = float3(-80, -10, 0);
+    leg7Part2.pos = float3(-113, 0, 0);
+    leg7Part2.rot.angleRad = PI / 3;
+    leg7Part1.rot.angleRad = -PI/8;
+    leg7Part1.rot.angleRad = PI/8 * (sin01(time * 3) - PI/8);
+
+    leg8Part1.pos = float3(-70, -40, 0);
+    leg8Part2.pos = float3(-93, 0, 0);
+    leg8Part2.rot.angleRad = PI / 4;
+    leg8Part1.rot.angleRad = (-2*PI)/8;
+    leg8Part1.rot.angleRad = PI/8 * (sin01(time * 4) - (-2*PI)/8);
+
+
+    circle2Transform.pos = float3(0, -220, 0);
+}
+
 void ProgramWindow::render() {
-    glClearColor(1, 0, 1, 1);
+    glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glLoadIdentity();
     glColor3f(0,0,0);
 
     transform(circleTransform);
-    drawCircle(float3(0), float3(100, 200, 1));
-
+    drawCircle(float3(0), float3(100, 100, 0));
+    
     glPushMatrix();
-        transform(quadTransform);
-        drawQuad(float3(100, 0, 0), float3(100, 40, 0));
+        transform(leg1Part1);
+        drawQuad(float3(0, 0, 0), float3(200, 15, 0));
 
-        transform(quadTransform2);
-        drawQuad(float3(0, 0, 0), float3(100, 40, 0));
+        transform(leg1Part2);
+        drawQuad(float3(0, 0, 0), float3(100, 15, 0));
     glPopMatrix();
 
     glPushMatrix();
-        transform(quadTransform3);
-        drawQuad(float3(-100, 0, 0), float3(-100, -40, 0));
+        transform(leg2Part1);
+        drawQuad(float3(0, 0, 0), float3(160, 15, 0));
 
-        transform(quadTransform4);
-        drawQuad(float3(0, 0, 0), float3(-100, -40, 0));
+        transform(leg2Part2);
+        drawQuad(float3(0, 0, 0), float3(80, 15, 0));
     glPopMatrix();
 
     glPushMatrix();
-        transform(quadTransform);
-        drawQuad(float3(100, 50, 0), float3(100, 40, 0));
+        transform(leg3Part1);
+        drawQuad(float3(0, 0, 0), float3(120, 15, 0));
 
-        transform(quadTransform2);
-        drawQuad(float3(-20, 45, 0), float3(100, 40, 0));
+        transform(leg3Part2);
+        drawQuad(float3(0, 0, 0), float3(60, 15, 0));
     glPopMatrix();
+
+    glPushMatrix();
+        transform(leg4Part1);
+        drawQuad(float3(0, 0, 0), float3(100, 15, 0));
+
+        transform(leg4Part2);
+        drawQuad(float3(0, 0, 0), float3(140, 15, 0));
+    glPopMatrix();
+
+    glPushMatrix();
+        transform(leg5Part1);
+        drawQuad(float3(0, 0, 0), float3(-200, 15, 0));
+
+        transform(leg5Part2);
+        drawQuad(float3(0, 0, 0), float3(-100, 15, 0));
+    glPopMatrix();
+
+
+    glPushMatrix();
+        transform(leg6Part1);
+        drawQuad(float3(0, 0, 0), float3(-160, 15, 0));
+
+        transform(leg6Part2);
+        drawQuad(float3(0, 0, 0), float3(-80, 15, 0));
+    glPopMatrix();
+
+
+    glPushMatrix();
+        transform(leg7Part1);
+        drawQuad(float3(0, 0, 0), float3(-120, 15, 0));
+
+        transform(leg7Part2);
+        drawQuad(float3(0, 0, 0), float3(-60, 15, 0));
+    glPopMatrix();
+
+    glPushMatrix();
+        transform(leg8Part1);
+        drawQuad(float3(0, 0, 0), float3(-100, 15, 0));
+
+        transform(leg8Part2);
+        drawQuad(float3(0, 0, 0), float3(-140, 15, 0));
+    glPopMatrix();
+
+    glPushMatrix();
+        transform(circle2Transform);
+        drawCircle(float3(0), float3(120, 160, 0));
+    glPopMatrix();
+
 
     glutSwapBuffers();
-}
-
-void ProgramWindow::update() {
-    int msecs = glutGet(GLUT_ELAPSED_TIME);
-    float time = 1e-3f * msecs;
-
-    // if(spider.rot.prev != spider.rot.target) {
-    //     spider.rot.prev = spider.rot.target;
-    
-    //     float deltaAngle = spider.rot.curr - spider.rot.target;
-
-    //     // spider.rot.dist = abs(deltaAngle);
-    //     spider.rot.dir = deltaAngle < 0;
-    //     // if complementar angle, use the small one
-    //     if (abs(deltaAngle) > 3.2) {
-    //         // taking smallest angular space
-    //         spider.rot.dist = abs(6.4 - abs(deltaAngle) - 0.11);
-    //         // change direction to move through smallest angle
-    //         spider.rot.dir = !spider.rot.dir;
-    //     } else {
-    //         // taking regular angular space
-    //         spider.rot.dist = abs(deltaAngle);
-    //     }
-    //     spider.rot.rotating = true;
-    // }
-
-    // float da = 3.2 / PI / 130;
-    // float da = 3.2 / PI / 80;
-    // if(spider.rot.dist > da && spider.rot.rotating) {
-
-    //     if (spider.rot.dir) {
-    //         spider.rot.curr += da;
-    //     } else {
-    //         spider.rot.curr -= da;
-    //     }
-    //     spider.rot.dist -= da;
-    // } else if(spider.rot.rotating){
-    //     spider.rot.dist = 0;
-    //     spider.rot.rotating = false;
-    //     spider.rot.curr = spider.rot.target;
-    //     spider.pos.moving = true;
-
-        // printf("------------------\n");
-        // printf("target: %f\n", spider.rot.target);
-        // printf("curr: %f\n", spider.rot.curr);
-        // printf("prev: %f\n", spider.rot.prev);
-        // printf("dist: %f\n", spider.rot.dist);
-        // printf("direction: %d\n", spider.rot.dir);
-        // printf("------------------\n");
-    // }
-
-    // circleTransform.pos = spider.pos.curr;
-    // float3 delta = spider.pos.target - spider.pos.curr;
-    // printf("delta: %f, %f\n", delta.x, delta.y);
-
-    // if (spider.pos.moving && abs(delta.x) > 0.01 && abs(delta.y) > 0.01) {
-    //     // printf("dir: %f, %f\n", spider.pos.dir.x, spider.pos.dir.y);
-    //     spider.pos.curr += spider.pos.dir;
-    //     // printf("curr: %f, %f\n", spider.pos.curr.x, spider.pos.curr.y);
-    //     // printf("target: %f, %f\n", spider.pos.target.x, spider.pos.target.y);
-    // } else if(spider.pos.moving) {
-    //     printf("stop!\n");
-    //     spider.pos.curr = spider.pos.target;
-    //     spider.pos.moving = false;
-    // }
-
-    circleTransform.rot.angleRad = spider.rot.curr;
-    circleTransform.pos = spider.pos.curr;
-    // circleTransform.scale = float3(1 + sin01(time * 3) * 0.1,1+ sin01(time * 3) * 0.1,1);
-    
-    quadTransform.pos = float3(0, 0, 0);
-    quadTransform.rot.angleRad = PI / 6 * sin01(time * 3);
-
-    quadTransform2.pos = float3(180, 0, 0);
-    quadTransform2.rot.angleRad = - PI / 8;
-    
-    quadTransform3.pos = float3(0, 0, 0);
-    quadTransform3.rot.angleRad = PI / 6 * (-1*sin01(time * 3));
-
-    quadTransform4.pos = float3(-180, 0, 0);
-    quadTransform4.rot.angleRad =  PI / 8;
-
-    quadTransform5.pos = float3(0, 0, 0);
-    quadTransform5.rot.angleRad = PI / 6 * sin01(time * 3);
-
-    quadTransform6.pos = float3(180, 0, 0);
-    quadTransform6.rot.angleRad = - PI / 8;
-
-    // quadTransform7.pos = float3(0, 0, 0);
-    // quadTransform7.rot.angleRad = PI / 6 * (-1*sin01(time * 3));
-
-    // quadTransform8.pos = float3(-180, 0, 0);
-    // quadTransform8.rot.angleRad =  PI / 8;
 }
